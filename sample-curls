@@ -1,0 +1,244 @@
+# GraphQL E-commerce API - cURL Examples
+
+# 1. Get all products
+curl -X POST \
+  http://localhost:4000/graphql \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "query GetProducts { products { id name price discountPrice brand stock category { name } rating { average count } } }"
+  }'
+
+# 2. Get single product with details
+curl -X POST \
+  http://localhost:4000/graphql \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "query GetProduct($id: ID!) { product(id: $id) { id name description price discountPrice brand images stock sku tags specifications { weight dimensions color material } rating { average count } category { name } reviews { id rating comment title user { firstName lastName } } } }",
+    "variables": { "id": "507f1f77bcf86cd799439031" }
+  }'
+
+# 3. Search products
+curl -X POST \
+  http://localhost:4000/graphql \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "query SearchProducts($query: String!) { searchProducts(query: $query) { id name price brand category { name } } }",
+    "variables": { "query": "iPhone" }
+  }'
+
+# 4. Get products with filters and sorting
+curl -X POST \
+  http://localhost:4000/graphql \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "query GetProductsFiltered($filter: ProductFilter, $sort: ProductSort) { products(filter: $filter, sort: $sort) { id name price brand stock category { name } } }",
+    "variables": {
+      "filter": {
+        "categoryId": "507f1f77bcf86cd799439022",
+        "minPrice": 500,
+        "maxPrice": 2000
+      },
+      "sort": {
+        "field": "PRICE",
+        "order": "ASC"
+      }
+    }
+  }'
+
+# 5. Get all categories
+curl -X POST \
+  http://localhost:4000/graphql \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "query GetCategories { categories { id name description parentCategory { name } subcategories { id name } } }"
+  }'
+
+# 6. Get top-level categories only
+curl -X POST \
+  http://localhost:4000/graphql \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "query GetTopCategories { topCategories { id name description subcategories { id name } } }"
+  }'
+
+# 7. Get all users
+curl -X POST \
+  http://localhost:4000/graphql \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "query GetUsers { users { id username email firstName lastName role address { city state country } } }"
+  }'
+
+# 8. Get all orders
+curl -X POST \
+  http://localhost:4000/graphql \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "query GetOrders { orders { id totalAmount status paymentStatus trackingNumber user { firstName lastName } items { quantity price product { name } } } }"
+  }'
+
+# 9. Get single order with full details
+curl -X POST \
+  http://localhost:4000/graphql \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "query GetOrder($id: ID!) { order(id: $id) { id totalAmount status paymentStatus trackingNumber notes shippingAddress { street city state zipCode country } user { firstName lastName email } items { quantity price product { name price images } } createdAt updatedAt } }",
+    "variables": { "id": "507f1f77bcf86cd799439041" }
+  }'
+
+# 10. Get reviews for a product
+curl -X POST \
+  http://localhost:4000/graphql \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "query GetReviews($productId: ID!) { reviews(productId: $productId) { id rating comment title helpful verified user { firstName lastName } createdAt } }",
+    "variables": { "productId": "507f1f77bcf86cd799439031" }
+  }'
+
+# 11. Register a new user
+curl -X POST \
+  http://localhost:4000/graphql \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "mutation RegisterUser($username: String!, $email: String!, $password: String!, $firstName: String!, $lastName: String!) { register(username: $username, email: $email, password: $password, firstName: $firstName, lastName: $lastName) { id username email firstName lastName role } }",
+    "variables": {
+      "username": "newuser",
+      "email": "newuser@example.com",
+      "password": "password123",
+      "firstName": "New",
+      "lastName": "User"
+    }
+  }'
+
+# 12. Login user
+curl -X POST \
+  http://localhost:4000/graphql \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "mutation LoginUser($email: String!, $password: String!) { login(email: $email, password: $password) }",
+    "variables": {
+      "email": "john@example.com",
+      "password": "password"
+    }
+  }'
+
+# 13. Create a new product
+curl -X POST \
+  http://localhost:4000/graphql \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "mutation CreateProduct($input: CreateProductInput!) { createProduct(input: $input) { id name price category { name } } }",
+    "variables": {
+      "input": {
+        "name": "New Smartphone",
+        "description": "Latest smartphone with amazing features",
+        "price": 799.99,
+        "categoryId": "507f1f77bcf86cd799439022",
+        "brand": "TechBrand",
+        "stock": 30,
+        "sku": "TECH-PHONE-001",
+        "tags": ["smartphone", "new", "tech"]
+      }
+    }
+  }'
+
+# 14. Create a new category
+curl -X POST \
+  http://localhost:4000/graphql \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "mutation CreateCategory($name: String!, $description: String) { createCategory(name: $name, description: $description) { id name description } }",
+    "variables": {
+      "name": "Accessories",
+      "description": "Phone and computer accessories"
+    }
+  }'
+
+# 15. Create an order
+curl -X POST \
+  http://localhost:4000/graphql \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "mutation CreateOrder($input: CreateOrderInput!) { createOrder(input: $input) { id totalAmount status items { quantity price product { name } } } }",
+    "variables": {
+      "input": {
+        "items": [
+          {
+            "productId": "507f1f77bcf86cd799439031",
+            "quantity": 1
+          }
+        ],
+        "shippingAddress": {
+          "street": "789 New St",
+          "city": "Chicago",
+          "state": "IL",
+          "zipCode": "60601",
+          "country": "USA"
+        },
+        "paymentMethod": "Credit Card"
+      }
+    }
+  }'
+
+# 16. Create a review
+curl -X POST \
+  http://localhost:4000/graphql \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "mutation CreateReview($input: CreateReviewInput!) { createReview(input: $input) { id rating comment title product { name } } }",
+    "variables": {
+      "input": {
+        "productId": "507f1f77bcf86cd799439031",
+        "rating": 5,
+        "comment": "Excellent product! Highly recommend.",
+        "title": "Amazing quality"
+      }
+    }
+  }'
+
+# 17. Update order status
+curl -X POST \
+  http://localhost:4000/graphql \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "mutation UpdateOrderStatus($id: ID!, $status: OrderStatus!) { updateOrderStatus(id: $id, status: $status) { id status updatedAt } }",
+    "variables": {
+      "id": "507f1f77bcf86cd799439041",
+      "status": "SHIPPED"
+    }
+  }'
+
+# 18. Update product
+curl -X POST \
+  http://localhost:4000/graphql \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "mutation UpdateProduct($id: ID!, $input: UpdateProductInput!) { updateProduct(id: $id, input: $input) { id name price stock } }",
+    "variables": {
+      "id": "507f1f77bcf86cd799439031",
+      "input": {
+        "price": 849.99,
+        "stock": 45
+      }
+    }
+  }'
+
+# 19. Delete product
+curl -X POST \
+  http://localhost:4000/graphql \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "mutation DeleteProduct($id: ID!) { deleteProduct(id: $id) }",
+    "variables": {
+      "id": "507f1f77bcf86cd799439035"
+    }
+  }'
+
+# 20. Complex query - Get product with category, reviews, and user details
+curl -X POST \
+  http://localhost:4000/graphql \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "query GetProductComplete($id: ID!) { product(id: $id) { id name description price discountPrice brand images stock sku tags specifications { weight dimensions color material } rating { average count } category { id name description parentCategory { name } } reviews { id rating comment title helpful verified user { firstName lastName } createdAt } } }",
+    "variables": { "id": "507f1f77bcf86cd799439031" }
+  }'
